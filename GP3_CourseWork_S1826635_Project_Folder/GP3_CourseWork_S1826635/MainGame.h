@@ -43,7 +43,7 @@ private:
 	void fireMissiles(int missileNumber);
 
 	void initModels(GameObject*& asteroid);
-	bool collision(glm::vec3 m1Pos, float m1Rad, glm::vec3 m2Pos, float m2Rad);
+	bool collision(glm::vec3 *m1Pos, float m1Rad, glm::vec3 *m2Pos, float m2Rad);
 
 	void moveCamera();
 

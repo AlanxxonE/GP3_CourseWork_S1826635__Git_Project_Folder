@@ -35,6 +35,7 @@ void MainGame::initSystems()
 	FBOShader.init("..\\res\\FBOShader.vert", "..\\res\\FBOShader.frag");
 	
 	gameAudio.addAudioTrack("..\\res\\background.wav");
+	gameAudio.addSoundEffect("..\\res\\whistle.wav");
 
 	initModels(asteroid);
 
@@ -72,7 +73,7 @@ void MainGame::initSystems()
 
 	shipTransform.SetRot(glm::vec3(0, -1.55, 0));
 	shipTransform.SetScale(glm::vec3(1.0, 1.0, 1.0));
-
+	shipTransform.SetPos(glm::vec3(-80.0, 0.0, -80.0));
 }
 
 void MainGame::createScreenQuad()
@@ -124,7 +125,7 @@ void MainGame::gameLoop()
 		deltaTime.UpdateDeltaTime();
 		UpdateDeltaSpeed();
 		//updateDelta();
-		collision(rockMesh.getSpherePos(), rockMesh.getSphereRadius(), shipMesh.getSpherePos(), shipMesh.getSphereRadius());
+		//collision(rockMesh.getSpherePos(), rockMesh.getSphereRadius(), shipMesh.getSpherePos(), shipMesh.getSphereRadius());
 		//playAudio(backGroundMusic, glm::vec3(0.0f,0.0f,0.0f));
 		//cout << "x: " << myCamera.getPos().x << "y: " << myCamera.getPos().y << "z: " << myCamera.getPos().z << "\n";
 	}
@@ -306,9 +307,10 @@ void MainGame::initModels(GameObject*& asteroid)
 {
 	for (int i = 0; i < 20; ++i)
 	{
-		float rX = -1.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0 - -1.0)));
+		
+		float rX = -2.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2.0)));
 		float rY= -1.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0 - -1.0)));
-		float rZ = -1.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0 - -1.0)));
+		float rZ = -2.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2.0)));
 
 		asteroid[i].transformPositions(glm::vec3(10.0 * i * rX, 2.0 * i * rY * 0, 10.0 * i * rZ), glm::vec3(rX, rY, rZ), glm::vec3(1.0, 1.0, 1.0));
 		asteroid[i].update(&rockMesh);		
@@ -337,10 +339,24 @@ void MainGame::drawAsteriods()
 
 	for (int i = 0; i < 20; ++i)
 	{
-		asteroid[i].transformPositions(glm::vec3(*asteroid[i].getTM().GetPos()), glm::vec3(asteroid[i].getTM().GetRot()->x + deltaTime.GetDeltaTime(), asteroid[i].getTM().GetRot()->y + deltaTime.GetDeltaTime(), asteroid[i].getTM().GetRot()->z + deltaTime.GetDeltaTime()), glm::vec3(0.2, 0.2, 0.2));
-		asteroid[i].draw(&rockMesh);
-		asteroid[i].update(&rockMesh);
-		eMapping.Update(asteroid[i].getTM(), myCamera);
+		if (asteroid[i].getActive())
+		{
+			if (collision(asteroid[i].getTM().GetPos(), 1.0, shipTransform.GetPos(), 1.0))
+			{
+				asteroid[i].transformPositions(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+				asteroid[i].setActive(false);
+				shipTransform.SetRot(glm::vec3(0, 0, 0));
+				shipTransform.SetScale(glm::vec3(0, 0, 0));
+				shipTransform.SetPos(glm::vec3(0, 0.0, 0));
+
+				_gameState = GameState::EXIT;
+			}
+
+			asteroid[i].transformPositions(glm::vec3(*asteroid[i].getTM().GetPos()), glm::vec3(asteroid[i].getTM().GetRot()->x + deltaTime.GetDeltaTime(), asteroid[i].getTM().GetRot()->y + deltaTime.GetDeltaTime(), asteroid[i].getTM().GetRot()->z + deltaTime.GetDeltaTime()), glm::vec3(0.2, 0.2, 0.2));
+			asteroid[i].draw(&rockMesh);
+			asteroid[i].update(&rockMesh);
+			eMapping.Update(asteroid[i].getTM(), myCamera);
+		}
 	}
 }
 
@@ -354,6 +370,14 @@ void MainGame::drawMissiles()
 	{
 		if (missiles[i].getActive())
 		{
+			if (collision(asteroid[i].getTM().GetPos(), 1.0, missiles[i].getTM().GetPos(), 1.0))
+			{
+				asteroid[i].transformPositions(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+				asteroid[i].setActive(false);
+				missiles[i].transformPositions(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+				missiles[i].setActive(false);
+			}
+
 			//missilesTransform[i].SetPos(glm::vec3((missilesTransform[i].GetPos()->x + (missilesTransform[i].GetPos()->x - asteroid[i].getTM().GetPos()->x)) / sqrt((missilesTransform[i].GetPos()->x - asteroid[i].getTM().GetPos()->x)* (missilesTransform[i].GetPos()->x - asteroid[i].getTM().GetPos()->x) + (missilesTransform[i].GetPos()->z - asteroid[i].getTM().GetPos()->z)*(missilesTransform[i].GetPos()->z - asteroid[i].getTM().GetPos()->z)) + deltaSpeed,0, (missilesTransform[i].GetPos()->z + (missilesTransform[i].GetPos()->z - asteroid[i].getTM().GetPos()->z)) / sqrt((missilesTransform[i].GetPos()->x - asteroid[i].getTM().GetPos()->x) * (missilesTransform[i].GetPos()->x - asteroid[i].getTM().GetPos()->x) + (missilesTransform[i].GetPos()->z - asteroid[i].getTM().GetPos()->z) * (missilesTransform[i].GetPos()->z - asteroid[i].getTM().GetPos()->z)) + deltaSpeed));
 			//missilesTransform[i].SetPos(glm::vec3((missilesTransform[i].GetPos()->x + asteroid[i].getTM().GetPos()->x) * 0.01,0, (missilesTransform[i].GetPos()->z + asteroid[i].getTM().GetPos()->z) * 0.01));
 			//missilesTransform[i].SetRot(glm::vec3(1.55, counter, 0));
@@ -471,14 +495,14 @@ void MainGame::drawSkyBox()
 }
 
 
-bool MainGame::collision(glm::vec3 m1Pos, float m1Rad, glm::vec3 m2Pos, float m2Rad)
+bool MainGame::collision(glm::vec3 *m1Pos, float m1Rad, glm::vec3 *m2Pos, float m2Rad)
 {
-	float distance = glm::sqrt((m2Pos.x - m1Pos.x)*(m2Pos.x - m1Pos.x) + (m2Pos.y - m1Pos.y)*(m2Pos.y - m1Pos.y) + (m2Pos.z - m1Pos.z)*(m2Pos.z - m1Pos.z));
+	float distance = glm::sqrt((m2Pos->x - m1Pos->x)*(m2Pos->x - m1Pos->x) + (m2Pos->y - m1Pos->y)*(m2Pos->y - m1Pos->y) + (m2Pos->z - m1Pos->z)*(m2Pos->z - m1Pos->z));
 
 	if (distance < (m1Rad + m2Rad))
 	{
-		//audioDevice.setlistener(myCamera.getPos(), m1Pos); //add bool to mesh
-		//playAudio(whistle, m1Pos);
+		gameAudio.playSoundEffect(0);
+		cout << "COLLISION";
 		return true;
 	}
 	else
