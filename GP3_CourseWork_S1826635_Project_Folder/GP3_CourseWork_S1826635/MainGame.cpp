@@ -307,13 +307,15 @@ void MainGame::initModels(GameObject*& asteroid)
 {
 	for (int i = 0; i < 20; ++i)
 	{
-		
+		int range = 20 - -20.0 + 1;
+		int rAsDir = rand() % range + -20.0;
 		float rX = -2.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2.0)));
 		float rY= -1.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0 - -1.0)));
 		float rZ = -2.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2.0)));
 
 		asteroid[i].transformPositions(glm::vec3(10.0 * i * rX, 2.0 * i * rY * 0, 10.0 * i * rZ), glm::vec3(rX, rY, rZ), glm::vec3(1.0, 1.0, 1.0));
-		asteroid[i].update(&rockMesh);		
+		asteroid[i].update(&rockMesh);
+		asDir[i] = rAsDir;
 	}
 
 	//ship.transformPositions(glm::vec3(0.0, 0.0, -3.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.2,0.2,0.2));
@@ -349,13 +351,18 @@ void MainGame::drawAsteriods()
 				shipTransform.SetScale(glm::vec3(0, 0, 0));
 				shipTransform.SetPos(glm::vec3(0, 0.0, 0));
 
-				_gameState = GameState::EXIT;
+				//_gameState = GameState::EXIT;
 			}
 
-			asteroid[i].transformPositions(glm::vec3(*asteroid[i].getTM().GetPos()), glm::vec3(asteroid[i].getTM().GetRot()->x + deltaTime.GetDeltaTime(), asteroid[i].getTM().GetRot()->y + deltaTime.GetDeltaTime(), asteroid[i].getTM().GetRot()->z + deltaTime.GetDeltaTime()), glm::vec3(0.2, 0.2, 0.2));
+			asteroid[i].transformPositions(glm::vec3(asteroid[i].getTM().GetPos()->x + asDir[i] * deltaTime.GetDeltaTime(), 0, asteroid[i].getTM().GetPos()->z + asDir[i + 1] * deltaTime.GetDeltaTime()), glm::vec3(asteroid[i].getTM().GetRot()->x + deltaTime.GetDeltaTime(), asteroid[i].getTM().GetRot()->y + deltaTime.GetDeltaTime(), asteroid[i].getTM().GetRot()->z + deltaTime.GetDeltaTime()), glm::vec3(0.2, 0.2, 0.2));
 			asteroid[i].draw(&rockMesh);
 			asteroid[i].update(&rockMesh);
 			eMapping.Update(asteroid[i].getTM(), myCamera);
+
+			if ((asteroid[i].getTM().GetPos()->x) > 200 || (asteroid[i].getTM().GetPos()->x) < - 200)
+			{
+				asteroid[i].transformPositions(-*asteroid[i].getTM().GetPos(), glm::vec3(asteroid[i].getTM().GetRot()->x + deltaTime.GetDeltaTime(), asteroid[i].getTM().GetRot()->y + deltaTime.GetDeltaTime(), asteroid[i].getTM().GetRot()->z + deltaTime.GetDeltaTime()), glm::vec3(0.2, 0.2, 0.2));
+			}
 		}
 	}
 }
@@ -503,6 +510,7 @@ bool MainGame::collision(glm::vec3 *m1Pos, float m1Rad, glm::vec3 *m2Pos, float 
 	{
 		gameAudio.playSoundEffect(0);
 		cout << "COLLISION";
+		shake = true;
 		return true;
 	}
 	else
@@ -636,10 +644,19 @@ void MainGame::renderFBO()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	FBOShader.Bind();
-	if(shake)
-	FBOShader.setFloat("time", counter);
+	if (shake)
+	{
+		FBOShader.setFloat("time", counter);
+
+		if (((int)counter % 4) < 1)
+		{
+			shake = false;
+		}
+	}
 	else
-	FBOShader.setFloat("time", 1);
+	{
+		FBOShader.setFloat("time", 1);
+	}
 	glBindVertexArray(quadVAO);
 	glBindTexture(GL_TEXTURE_2D, CBO);	// use the color attachment texture as the texture of the quad plane
 	glDrawArrays(GL_TRIANGLES, 0, 6);

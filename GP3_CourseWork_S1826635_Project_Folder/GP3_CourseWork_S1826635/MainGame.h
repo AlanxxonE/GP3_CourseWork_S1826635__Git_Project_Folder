@@ -92,6 +92,7 @@ private:
 
 	GameObject* asteroid = new GameObject[20];
 	GameObject* missiles = new GameObject[20];
+	float asDir[20] = { 0 };
 	GameObject ship;
 	Texture texture;
 
