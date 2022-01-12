@@ -384,38 +384,38 @@ void MainGame::fireMissiles(int missileNumber)
 	//	mvmatrix[i] = mvSource[i];
 	//}
 
-	GLdouble mvMatrix[16];
-	GLdouble projMatrix[16];
-	GLint viewport[4];
+	//GLdouble mvMatrix[16];
+	//GLdouble projMatrix[16];
+	//GLint viewport[4];
 	//GLdouble objx;
 	//GLdouble objy;
 	//GLdouble objz;
 	//int realY;
-	glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix);
-	glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-	glGetIntegerv(GL_VIEWPORT, viewport);
+	//glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix);
+	//glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
+	//glGetIntegerv(GL_VIEWPORT, viewport);
 
-	cout << '\n';
-	cout << "VIEWPORT MATRIX" << '\n';;
-	cout << viewport[0] << "|" << viewport[1] << '\n';
-	cout << viewport[2] << "|" << viewport[3] << '\n';
-	cout << '\n';
+	//cout << '\n';
+	//cout << "VIEWPORT MATRIX" << '\n';;
+	//cout << viewport[0] << "|" << viewport[1] << '\n';
+	//cout << viewport[2] << "|" << viewport[3] << '\n';
+	//cout << '\n';
 
-	cout << '\n';
-	cout << "MODELVIEW MATRIX" << '\n';;
-	cout << mvMatrix[0] << "|" << mvMatrix[1] << mvMatrix[2] << "|" << mvMatrix[3] << '\n';
-	cout << mvMatrix[4] << "|" << mvMatrix[5] << mvMatrix[6] << "|" << mvMatrix[7] << '\n';
-	cout << mvMatrix[8] << "|" << mvMatrix[9] << mvMatrix[10] << "|" << mvMatrix[11] << '\n';
-	cout << mvMatrix[12] << "|" << mvMatrix[13] << mvMatrix[14] << "|" << mvMatrix[15] << '\n';
-	cout << '\n';
+	//cout << '\n';
+	//cout << "MODELVIEW MATRIX" << '\n';;
+	//cout << mvMatrix[0] << "|" << mvMatrix[1] << mvMatrix[2] << "|" << mvMatrix[3] << '\n';
+	//cout << mvMatrix[4] << "|" << mvMatrix[5] << mvMatrix[6] << "|" << mvMatrix[7] << '\n';
+	//cout << mvMatrix[8] << "|" << mvMatrix[9] << mvMatrix[10] << "|" << mvMatrix[11] << '\n';
+	//cout << mvMatrix[12] << "|" << mvMatrix[13] << mvMatrix[14] << "|" << mvMatrix[15] << '\n';
+	//cout << '\n';
 
-	cout << '\n';
-	cout << "PROJECTION MATRIX" << '\n';;
-	cout << projMatrix[0] << "|" << projMatrix[1] << projMatrix[2] << "|" << projMatrix[3] << '\n';
-	cout << projMatrix[4] << "|" << projMatrix[5] << projMatrix[6] << "|" << projMatrix[7] << '\n';
-	cout << projMatrix[8] << "|" << projMatrix[9] << projMatrix[10] << "|" << projMatrix[11] << '\n';
-	cout << projMatrix[12] << "|" << projMatrix[13] << projMatrix[14] << "|" << projMatrix[15] << '\n';
-	cout << '\n';
+	//cout << '\n';
+	//cout << "PROJECTION MATRIX" << '\n';;
+	//cout << projMatrix[0] << "|" << projMatrix[1] << projMatrix[2] << "|" << projMatrix[3] << '\n';
+	//cout << projMatrix[4] << "|" << projMatrix[5] << projMatrix[6] << "|" << projMatrix[7] << '\n';
+	//cout << projMatrix[8] << "|" << projMatrix[9] << projMatrix[10] << "|" << projMatrix[11] << '\n';
+	//cout << projMatrix[12] << "|" << projMatrix[13] << projMatrix[14] << "|" << projMatrix[15] << '\n';
+	//cout << '\n';
 
 	//realY = viewport[3] - mouseY - 1;
 

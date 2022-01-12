@@ -1,10 +1,10 @@
 #pragma once
 #include <vector>
 #include <GL\glew.h>
-#include "../Lab1/stb_image.h"
-#include "../Lab1/Shader.h"
+#include "../GP3_CourseWork_S1826635/stb_image.h"
+#include "../GP3_CourseWork_S1826635/Shader.h"
 #include <iostream>
-#include "../Lab1/Camera.h"
+#include "../GP3_CourseWork_S1826635/Camera.h"
 
 class Skybox
 {
