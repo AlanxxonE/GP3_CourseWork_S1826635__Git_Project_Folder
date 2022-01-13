@@ -45,11 +45,7 @@ private:
 	void initModels(GameObject*& asteroid);
 	bool collision(glm::vec3 *m1Pos, float m1Rad, glm::vec3 *m2Pos, float m2Rad);
 
-	void moveCamera();
-
 	void UpdateDeltaSpeed();
-
-	//void updateDelta();
 
 	void createScreenQuad();
 
@@ -57,8 +53,6 @@ private:
 	void bindFBO();
 	void unbindFBO();
 	void renderFBO();
-
-	//void playAudio(unsigned int Source, glm::vec3 pos);
 
 	Display _gameDisplay;
 	GameState _gameState;
@@ -86,14 +80,11 @@ private:
 	int missileCounter;
 	GLint mouseX, mouseY;
 
-	Transform transform;
-	//Transform* missilesTransform = new Transform[20];
-
-
 	GameObject* asteroid = new GameObject[20];
-	GameObject* missiles = new GameObject[20];
 	float asDir[20] = { 0 };
+	GameObject* missiles = new GameObject[20];	
 	GameObject ship;
+
 	Texture texture;
 
 	GLuint FBO;
@@ -103,20 +94,12 @@ private:
 	GLuint quadVAO;
 	GLuint quadVBO;
 
-
-	glm::vec3 currentCamPos;
-
 	Skybox skybox;
 
 	vector<std::string> faces;
 	
-	//Audio audioDevice;
 	bool look = true;
 	bool shake = false;
 	float counter;
-
-	Uint64 NOW = SDL_GetPerformanceCounter();
-	Uint64 LAST = 0;
-	//float deltaTime = 0;
 };
 

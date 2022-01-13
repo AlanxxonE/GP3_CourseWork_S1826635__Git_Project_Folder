@@ -21,16 +21,14 @@ void MainGame::run()
 
 void MainGame::initSystems()
 {
-	_gameDisplay.initDisplay(); 
-	//whistle = audioDevice.loadSound("..\\res\\bang.wav");
-	//backGroundMusic = audioDevice.loadSound("..\\res\\background.wav");
+	_gameDisplay.initDisplay();
 	texture.load("..\\res\\AstroShipTexture.jpg");
 	rockMesh.loadModel("..\\res\\Asteroid.obj");
 	shipMesh.loadModel("..\\res\\NewShip.obj");
 	missileMesh.loadModel("..\\res\\NewMissile.obj");
 	nShader.init("..\\res\\shaderVert.vert", "..\\res\\shaderFrag.frag");
-	fogShader.init("..\\res\\fogShader.vert", "..\\res\\fogShader.frag"); //new shader
-	toonShader.init("..\\res\\shaderToon.vert", "..\\res\\shaderToon.frag"); //new shader
+	fogShader.init("..\\res\\fogShader.vert", "..\\res\\fogShader.frag");
+	toonShader.init("..\\res\\shaderToon.vert", "..\\res\\shaderToon.frag");
 	rimShader.init("..\\res\\shaderRim.vert", "..\\res\\shaderRim.frag");
 	eMapping.init("..\\res\\shaderReflection.vert", "..\\res\\shaderReflection.frag");
 	FBOShader.init("..\\res\\FBOShader.vert", "..\\res\\FBOShader.frag");
@@ -38,15 +36,13 @@ void MainGame::initSystems()
 	gameAudio.addAudioTrack("..\\res\\background.wav");
 	gameAudio.addSoundEffect("..\\res\\bang.wav");
 
-	initModels(asteroid);
-
 	geoShader.initGeo();
 
 	myCamera.initCamera(glm::vec3(ship.getTM().GetPos()->x, ship.getTM().GetPos()->y + 20, -50), 70.0f, (float)_gameDisplay.getWidth()/_gameDisplay.getHeight(), 1.0f, 1000.0f);
 	myCamera.setLook(glm::vec3(ship.getTM().GetPos()->x, ship.getTM().GetPos()->y, ship.getTM().GetPos()->z));
 	myCamera.setPos(glm::vec3(ship.getTM().GetPos()->x, ship.getTM().GetPos()->y + 20, ship.getTM().GetPos()->z - 50));
 	
-	ship.transformPositions(glm::vec3(-80.0, 0.0, -80.0), glm::vec3(0, -1.55, 0), glm::vec3(1.0, 1.0, 1.0));
+	initModels(asteroid);
 
 	generateFBO(_gameDisplay.getWidth(), _gameDisplay.getHeight());
 
@@ -118,15 +114,12 @@ void MainGame::gameLoop()
 	while (_gameState != GameState::EXIT)
 	{
 		gameAudio.playMusic();
+
 		processInput();
-		currentCamPos = myCamera.getPos();
 		drawGame();
+
 		deltaTime.UpdateDeltaTime();
 		UpdateDeltaSpeed();
-		//updateDelta();
-		//collision(rockMesh.getSpherePos(), rockMesh.getSphereRadius(), shipMesh.getSpherePos(), shipMesh.getSphereRadius());
-		//playAudio(backGroundMusic, glm::vec3(0.0f,0.0f,0.0f));
-		//cout << "x: " << myCamera.getPos().x << "y: " << myCamera.getPos().y << "z: " << myCamera.getPos().z << "\n";
 	}
 }
 
@@ -136,11 +129,16 @@ void MainGame::processInput()
 
 	SDL_PollEvent(&evnt);
 
+	if (keyboard_state_array[SDL_SCANCODE_ESCAPE])
+	{
+		_gameState = GameState::EXIT;
+	}
+
 	if (!keyboard_state_array[SDL_SCANCODE_A] && !keyboard_state_array[SDL_SCANCODE_D] && !keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_W])
 	{
 		engaging = false;
 
-		if (keyboard_state_array[SDL_SCANCODE_DOWN] && (ship.getTM().GetPos()->z - currentCamPos.z) < 100)
+		if (keyboard_state_array[SDL_SCANCODE_DOWN] && (ship.getTM().GetPos()->z - myCamera.getPos().z) < 100)
 		{
 			myCamera.MoveBack(-deltaSpeed);
 		}
@@ -163,40 +161,46 @@ void MainGame::processInput()
 				ship.transformPositions(glm::vec3((*ship.getTM().GetPos() - glm::vec3(0, deltaSpeed, 0))), *ship.getTM().GetRot(), *ship.getTM().GetScale());
 			}
 
-			if (keyboard_state_array[SDL_SCANCODE_A])
+			if (keyboard_state_array[SDL_SCANCODE_A] && ship.getTM().GetPos()->x < 100)
 			{
 				ship.transformPositions(glm::vec3((*ship.getTM().GetPos() + glm::vec3(deltaSpeed, 0, 0))), glm::vec3(0, 0, 0), *ship.getTM().GetScale());
 			}
 
-			if (keyboard_state_array[SDL_SCANCODE_D])
+			if (keyboard_state_array[SDL_SCANCODE_D] && ship.getTM().GetPos()->x > -100)
 			{
 				ship.transformPositions(glm::vec3((*ship.getTM().GetPos() - glm::vec3(deltaSpeed, 0, 0))), glm::vec3(0, 3.10, 0), *ship.getTM().GetScale());
 			}
 
-			if (keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_A] && !keyboard_state_array[SDL_SCANCODE_D])
+			if (ship.getTM().GetPos()->z > -100)
 			{
-				ship.transformPositions(glm::vec3((*ship.getTM().GetPos() - glm::vec3(0, 0, deltaSpeed))), glm::vec3(0, 1.55, 0), *ship.getTM().GetScale());
-			}
-			else if (keyboard_state_array[SDL_SCANCODE_S] && keyboard_state_array[SDL_SCANCODE_A] && !keyboard_state_array[SDL_SCANCODE_D])
-			{
-				ship.transformPositions(glm::vec3((*ship.getTM().GetPos() - glm::vec3(0, 0, deltaSpeed))), glm::vec3(0, 0.75, 0), *ship.getTM().GetScale());
-			}
-			else if (keyboard_state_array[SDL_SCANCODE_S] && keyboard_state_array[SDL_SCANCODE_D] && !keyboard_state_array[SDL_SCANCODE_A])
-			{
-				ship.transformPositions(glm::vec3((*ship.getTM().GetPos() - glm::vec3(0, 0, deltaSpeed))), glm::vec3(0, 2.35, 0), *ship.getTM().GetScale());
+				if (keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_A] && !keyboard_state_array[SDL_SCANCODE_D])
+				{
+					ship.transformPositions(glm::vec3((*ship.getTM().GetPos() - glm::vec3(0, 0, deltaSpeed))), glm::vec3(0, 1.55, 0), *ship.getTM().GetScale());
+				}
+				else if (keyboard_state_array[SDL_SCANCODE_S] && keyboard_state_array[SDL_SCANCODE_A] && !keyboard_state_array[SDL_SCANCODE_D])
+				{
+					ship.transformPositions(glm::vec3((*ship.getTM().GetPos() - glm::vec3(0, 0, deltaSpeed))), glm::vec3(0, 0.75, 0), *ship.getTM().GetScale());
+				}
+				else if (keyboard_state_array[SDL_SCANCODE_S] && keyboard_state_array[SDL_SCANCODE_D] && !keyboard_state_array[SDL_SCANCODE_A])
+				{
+					ship.transformPositions(glm::vec3((*ship.getTM().GetPos() - glm::vec3(0, 0, deltaSpeed))), glm::vec3(0, 2.35, 0), *ship.getTM().GetScale());
+				}
 			}
 
-			if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_A] && !keyboard_state_array[SDL_SCANCODE_D])
+			if (ship.getTM().GetPos()->z < 100)
 			{
-				ship.transformPositions(glm::vec3((*ship.getTM().GetPos() + glm::vec3(0, 0, deltaSpeed))), glm::vec3(0, -1.55, 0), *ship.getTM().GetScale());
-			}
-			else if (keyboard_state_array[SDL_SCANCODE_W] && keyboard_state_array[SDL_SCANCODE_A] && !keyboard_state_array[SDL_SCANCODE_D])
-			{
-				ship.transformPositions(glm::vec3((*ship.getTM().GetPos() + glm::vec3(0, 0, deltaSpeed))), glm::vec3(0, -0.75, 0), *ship.getTM().GetScale());
-			}
-			else if (keyboard_state_array[SDL_SCANCODE_W] && keyboard_state_array[SDL_SCANCODE_D] && !keyboard_state_array[SDL_SCANCODE_A])
-			{
-				ship.transformPositions(glm::vec3((*ship.getTM().GetPos() + glm::vec3(0, 0, deltaSpeed))), glm::vec3(0, -2.35, 0), *ship.getTM().GetScale());
+				if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_A] && !keyboard_state_array[SDL_SCANCODE_D])
+				{
+					ship.transformPositions(glm::vec3((*ship.getTM().GetPos() + glm::vec3(0, 0, deltaSpeed))), glm::vec3(0, -1.55, 0), *ship.getTM().GetScale());
+				}
+				else if (keyboard_state_array[SDL_SCANCODE_W] && keyboard_state_array[SDL_SCANCODE_A] && !keyboard_state_array[SDL_SCANCODE_D])
+				{
+					ship.transformPositions(glm::vec3((*ship.getTM().GetPos() + glm::vec3(0, 0, deltaSpeed))), glm::vec3(0, -0.75, 0), *ship.getTM().GetScale());
+				}
+				else if (keyboard_state_array[SDL_SCANCODE_W] && keyboard_state_array[SDL_SCANCODE_D] && !keyboard_state_array[SDL_SCANCODE_A])
+				{
+					ship.transformPositions(glm::vec3((*ship.getTM().GetPos() + glm::vec3(0, 0, deltaSpeed))), glm::vec3(0, -2.35, 0), *ship.getTM().GetScale());
+				}
 			}
 
 			myCamera.setPos(glm::vec3(ship.getTM().GetPos()->x, ship.getTM().GetPos()->y + 20, ship.getTM().GetPos()->z - 50));
@@ -212,94 +216,17 @@ void MainGame::processInput()
 			fireMissiles(missileCounter);
 		}
 	}
-
-	//while (SDL_PollEvent(&evnt)) //get and process events
-	//{
-	//	switch (evnt.type)
-	//	{
-	//	case SDL_MOUSEWHEEL:
-	//		myCamera.MoveBack(evnt.wheel.y);
-	//		break;
-	//	default:
-	//		break;
-	//	case SDL_MOUSEBUTTONDOWN:
-	//		switch (evnt.button.button)
-	//		{
-	//		case SDL_BUTTON_LEFT:
-	//			//SDL_ShowSimpleMessageBox(0, "Mouse", "Left button was pressed!", _gameDisplay.getWindow());
-	//			break;
-	//		case SDL_BUTTON_RIGHT:
-	//			//SDL_ShowSimpleMessageBox(0, "Mouse", "Right button was pressed!", _gameDisplay.getWindow());
-	//			break;
-	//		case SDL_BUTTON_MIDDLE:
-	//			break;
-	//		default:
-	//			//SDL_ShowSimpleMessageBox(0, "Mouse", "Some other button was pressed!", window);
-	//			break;
-	//		}
-	//	case SDL_KEYDOWN:
-	//		/* Check the SDLKey values and move change the coords */
-	//		switch (evnt.key.keysym.sym)
-	//		{
-	//		case SDLK_a:
-	//			shipTransform.SetPos(glm::vec3((*shipTransform.GetPos() + glm::vec3(deltaSpeed, 0, 0))));
-	//			//transform.SetPos(glm::vec3(transform.GetPos()->x + 1.0f/* *deltaTime */, transform.GetPos()->y, 0.0));
-	//			//cout << myCamera.getPos().x;
-	//			break;
-	//		case SDLK_w:
-	//			shipTransform.SetPos(glm::vec3((*shipTransform.GetPos() + glm::vec3(0,0,deltaSpeed))));
-	//			//transform.SetPos(glm::vec3(transform.GetPos()->x, transform.GetPos()->y + 1.0f/* *deltaTime */, 0.0));
-	//			break;
-	//		case SDLK_s:
-	//			shipTransform.SetPos(glm::vec3((*shipTransform.GetPos() - glm::vec3(0, 0, deltaSpeed))));
-	//			//transform.SetPos(glm::vec3(transform.GetPos()->x, transform.GetPos()->y - 1.0f /* *deltaTime */, 0.0));
-	//			break;
-	//		case SDLK_d:
-	//			shipTransform.SetPos(glm::vec3((*shipTransform.GetPos() - glm::vec3(deltaSpeed, 0, 0))));
-	//			//transform.SetPos(glm::vec3(transform.GetPos()->x - 1.0f*deltaTime, transform.GetPos()->y, 0.0));
-	//			break;
-	//		case SDLK_LEFT:
-	//			myCamera.MoveLeft(-deltaSpeed);
-	//			//cout << myCamera.getPos().x;
-	//			break;
-	//		case SDLK_RIGHT:
-	//			myCamera.MoveRight(-deltaSpeed);
-	//			break;
-	//		case SDLK_UP:
-	//			myCamera.MoveUp(deltaSpeed);
-	//			break;
-	//		case SDLK_DOWN:
-	//			myCamera.MoveDown(deltaSpeed);
-	//			break;
-	//		case SDLK_SPACE:
-	//			if (look)
-	//				look = false;
-	//			else
-	//				look = true;
-	//			break;
-	//		case SDLK_BACKSPACE:
-	//			if (shake)
-	//				shake = false;
-	//			else
-	//				shake = true;
-	//			break;
-	//		default:
-	//			break;
-	//		case SDL_QUIT:
-	//			_gameState = GameState::EXIT;
-	//			break;
-	//		}
-	//	}
-
-	//}
 }
 
 void MainGame::initModels(GameObject*& asteroid)
 {
+	ship.transformPositions(glm::vec3(-50.0, 0.0, -50.0), glm::vec3(0, -1.55, 0), glm::vec3(1.0, 1.0, 1.0));
+
 	for (int i = 0; i < 20; ++i)
 	{
 		int range = 50 - -50.0 + 1;
 		int rAsDir = rand() % range + -50.0;
+		
 		float rX = -1.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0 - -1.0)));
 		float rY= -1.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0 - -1.0)));
 		float rZ = -1.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0 - -1.0)));
@@ -309,11 +236,8 @@ void MainGame::initModels(GameObject*& asteroid)
 		asDir[i] = rAsDir;
 	}
 
-	//ship.transformPositions(glm::vec3(0.0, 0.0, -3.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.2,0.2,0.2));
-	
 	for (int i = 0; i < 20; ++i)
 	{
-		//missilesTransform[i] = missiles[i].getTM();
 		missiles[i].setActive(false);
 	}
 }
@@ -374,17 +298,8 @@ void MainGame::drawMissiles()
 				missiles[i].setActive(false);
 			}
 
-			//missilesTransform[i].SetPos(glm::vec3((missilesTransform[i].GetPos()->x + (missilesTransform[i].GetPos()->x - asteroid[i].getTM().GetPos()->x)) / sqrt((missilesTransform[i].GetPos()->x - asteroid[i].getTM().GetPos()->x)* (missilesTransform[i].GetPos()->x - asteroid[i].getTM().GetPos()->x) + (missilesTransform[i].GetPos()->z - asteroid[i].getTM().GetPos()->z)*(missilesTransform[i].GetPos()->z - asteroid[i].getTM().GetPos()->z)) + deltaSpeed,0, (missilesTransform[i].GetPos()->z + (missilesTransform[i].GetPos()->z - asteroid[i].getTM().GetPos()->z)) / sqrt((missilesTransform[i].GetPos()->x - asteroid[i].getTM().GetPos()->x) * (missilesTransform[i].GetPos()->x - asteroid[i].getTM().GetPos()->x) + (missilesTransform[i].GetPos()->z - asteroid[i].getTM().GetPos()->z) * (missilesTransform[i].GetPos()->z - asteroid[i].getTM().GetPos()->z)) + deltaSpeed));
-			//missilesTransform[i].SetPos(glm::vec3((missilesTransform[i].GetPos()->x + asteroid[i].getTM().GetPos()->x) * 0.01,0, (missilesTransform[i].GetPos()->z + asteroid[i].getTM().GetPos()->z) * 0.01));
-			//missilesTransform[i].SetRot(glm::vec3(1.55, counter, 0));
-			
-			//missilesTransform[i].SetPos(glm::vec3(glm::normalize(*asteroid[i].getTM().GetPos() - *missilesTransform[i].GetPos()) + glm::vec3(missilesTransform[i].GetPos()->x + deltaSpeed, 0, missilesTransform[i].GetPos()->z + deltaSpeed)));
-			//missilesTransform[i].SetRot(glm::vec3(glm::normalize(*missilesTransform[i].GetPos() + *asteroid[i].getTM().GetPos()) + glm::normalize(*shipTransform.GetPos() + *missilesTransform[i].GetPos())));
+			missiles[i].transformPositions(glm::vec3(glm::normalize(*asteroid[i].getTM().GetPos() - *missiles[i].getTM().GetPos()) + glm::vec3(missiles[i].getTM().GetPos()->x + deltaSpeed, 0, missiles[i].getTM().GetPos()->z + deltaSpeed)), glm::vec3(glm::normalize(*missiles[i].getTM().GetPos() + *asteroid[i].getTM().GetPos()) + glm::normalize(*ship.getTM().GetPos() + *missiles[i].getTM().GetPos()) + glm::vec3(0, 0, counter)), *missiles[i].getTM().GetScale());
 
-			missiles[i].transformPositions(glm::vec3(glm::normalize(*asteroid[i].getTM().GetPos() - *missiles[i].getTM().GetPos()) + glm::vec3(missiles[i].getTM().GetPos()->x + deltaSpeed, 0, missiles[i].getTM().GetPos()->z + deltaSpeed)), glm::vec3(glm::normalize(*missiles[i].getTM().GetPos() + *asteroid[i].getTM().GetPos()) + glm::normalize(*ship.getTM().GetPos() + *missiles[i].getTM().GetPos())), *missiles[i].getTM().GetScale());
-
-			//missilesTransform[i].SetRot(glm::vec3(missilesTransform[i].GetPos()->x, counter, missilesTransform[i].GetPos()->z));
-			//missiles[i].transformPositions(glm::vec3(*missilesTransform[i].GetPos()), glm::vec3(missilesTransform->GetRot()->x + deltaTime.GetDeltaTime(), missilesTransform->GetRot()->y + deltaTime.GetDeltaTime(), missilesTransform->GetRot()->z + deltaTime.GetDeltaTime()), glm::vec3(0.2, 0.2, 0.2));
 			missiles[i].draw(&missileMesh);
 			missiles[i].update(&missileMesh);
 			fogShader.Update(missiles[i].getTM(), myCamera);
@@ -450,26 +365,14 @@ void MainGame::fireMissiles(int missileNumber)
 	//cout << "X : " << (GLdouble)mouseX << "|||";
 	//cout << "Y : " << (GLdouble)mouseY << "|||";
 
-
-	//missilesTransform[missileNumber].SetScale(glm::vec3(0.3, 0.3, 0.3));
-	//missilesTransform[missileNumber].SetPos(*shipTransform.GetPos());
-	//missilesTransform[missileNumber].SetRot(*shipTransform.GetRot());
 	missiles[missileNumber].transformPositions(*ship.getTM().GetPos(), *ship.getTM().GetRot(), glm::vec3(0.3, 0.3, 0.3));
 	missiles[missileNumber].setActive(true);
-	/** CALL THIS FROM processInput()
-	* Set the missle transform to the ship transform ONCE (initial conditions)
-	* Set the missle to active (check it is not already active)
-	* Update the tranform to move the missle along its forward vector(more advanced, use seek to target)
-	* check for asteroid collision
-	* handle asteroid collision
-	*/
 }
 
 void MainGame::drawShip()
 {
 	texture.Bind(0);
 	nShader.Bind();
-	//linkRimLighting();
 
 	ship.draw(&shipMesh);
 	ship.update(&shipMesh);
@@ -486,7 +389,7 @@ void MainGame::drawSkyBox()
 
 	skybox.draw(&myCamera);
 
-	myCamera.setPos(currentCamPos);
+	myCamera.setPos(myCamera.getPos());
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnd();
 }
@@ -499,7 +402,6 @@ bool MainGame::collision(glm::vec3 *m1Pos, float m1Rad, glm::vec3 *m2Pos, float 
 	if (distance < (m1Rad + m2Rad))
 	{
 		gameAudio.playSoundEffect(0);
-		cout << "COLLISION";
 		shake = true;
 		return true;
 	}
@@ -512,26 +414,7 @@ bool MainGame::collision(glm::vec3 *m1Pos, float m1Rad, glm::vec3 *m2Pos, float 
 void MainGame::UpdateDeltaSpeed()
 {
 	deltaSpeed = kSpeed * deltaTime.GetDeltaTime();
-	//cout << "Delta Speed: " << deltaSpeed << "\n";
 }
-
-//void MainGame::playAudio(unsigned int Source, glm::vec3 pos)
-//{
-//	
-//	ALint state; 
-//	alGetSourcei(Source, AL_SOURCE_STATE, &state);
-//	/*
-//	Possible values of state
-//	AL_INITIAL
-//	AL_STOPPED
-//	AL_PLAYING
-//	AL_PAUSED
-//	*/
-//	if (AL_PLAYING != state)
-//	{
-//		audioDevice.playSound(Source, pos);
-//	}
-//}
 
 void MainGame::linkFogShader()
 {
@@ -567,7 +450,7 @@ void MainGame::linkRimLighting()
 	camDir = glm::normalize(camDir);
 	rimShader.setMat4("u_pm", myCamera.getProjection());
 	rimShader.setMat4("u_vm", myCamera.getView());
-	rimShader.setMat4("model", transform.GetModel());
+	rimShader.setMat4("model", ship.getTM().GetModel());
 	rimShader.setMat4("view", myCamera.getView());
 	rimShader.setVec3("lightDir", glm::vec3(0.5f, 0.5f, 0.5f));
 }
@@ -577,14 +460,6 @@ void MainGame::linkEmapping()
 	eMapping.setMat4("model", asteroid[0].getModel());
 	//eMapping.setVec3("cameraPos", myCamera.getPos());
 }
-
-//void MainGame::updateDelta()
-//{
-//	LAST = NOW;
-//	NOW = SDL_GetPerformanceCounter();
-//
-//	deltaTime = (float)((NOW - LAST) / (float)SDL_GetPerformanceFrequency());
-//}
 
 void MainGame::bindFBO()
 {
@@ -621,7 +496,7 @@ void MainGame::generateFBO(float w, float h)
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO); // now actually attach it
 
 
-// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+	// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
 		cout << "FRAMEBUFFER:: Framebuffer is complete!" << endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -51,11 +51,11 @@ public:
 	{
 		glUniform1f(glGetUniformLocation(shaderID, name.c_str()), value);
 
-		//if ((glGetUniformLocation(shaderID, name.c_str()) == -1))
-		//{
-		//	std::cerr << "Unable to load shader: " << name.c_str() << std::endl;
-		//	__debugbreak();
-		//}
+		if ((glGetUniformLocation(shaderID, name.c_str()) == -1))
+		{
+			std::cerr << "Unable to load shader: " << name.c_str() << std::endl;
+			__debugbreak();
+		}
 	}
 	// ------------------------------------------------------------------------
 	void setVec2(const std::string& name, const glm::vec2& value) const

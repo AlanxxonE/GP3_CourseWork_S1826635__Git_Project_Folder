@@ -6,8 +6,8 @@ Display::Display()
 {
 	sdlWindow = nullptr; //initialise to generate null access violation for debugging. 
 	glContext = nullptr; //initialise to generate null access violation for debugging. 
-	screenWidth = 1600.0f;
-	screenHeight = 1000.0f;
+	screenWidth = 1920.0f;
+	screenHeight = 1080.0f;
 }
 
 Display::~Display()
@@ -47,9 +47,6 @@ void Display::initDisplay()
 	SDL_Init(SDL_INIT_EVERYTHING); //initalise everything
 
 	Uint32 example = SDL_INIT_EVERYTHING;
-
-	//Commented out as INIT works properly and there is no need to check the Uint32 anymore!
-	//cout << example << '/n';
 
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8); //Min no of bits used to diplay colour
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);

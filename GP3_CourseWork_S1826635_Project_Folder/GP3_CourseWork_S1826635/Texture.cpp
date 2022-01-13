@@ -6,7 +6,6 @@
 
 Texture::Texture() 
 {
-	//textureHandler = 0;
 }
 
 void Texture::load(const std::string& fileName)
