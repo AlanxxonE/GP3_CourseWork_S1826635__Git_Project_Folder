@@ -139,5 +139,11 @@
     <None Include="..\res\FBOShader.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\res\shaderFrag.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\shaderVert.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

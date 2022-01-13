@@ -66,6 +66,7 @@ private:
 	Mesh shipMesh;
 	Mesh missileMesh;
 	Camera myCamera;
+	Shader nShader;
 	Shader fogShader;
 	Shader toonShader;
 	Shader rimShader;
@@ -86,7 +87,6 @@ private:
 	GLint mouseX, mouseY;
 
 	Transform transform;
-	Transform shipTransform = ship.getTM();
 	//Transform* missilesTransform = new Transform[20];
 
 
