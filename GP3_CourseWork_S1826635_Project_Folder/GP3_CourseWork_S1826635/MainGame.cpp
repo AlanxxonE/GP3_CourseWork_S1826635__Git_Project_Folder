@@ -25,9 +25,9 @@ void MainGame::initSystems()
 	//whistle = audioDevice.loadSound("..\\res\\bang.wav");
 	//backGroundMusic = audioDevice.loadSound("..\\res\\background.wav");
 	texture.load("..\\res\\AstroShipTexture.jpg");
-	rockMesh.loadModel("..\\res\\Rock1.obj");
+	rockMesh.loadModel("..\\res\\Asteroid.obj");
 	shipMesh.loadModel("..\\res\\NewShip.obj");
-	missileMesh.loadModel("..\\res\\NewR33.obj");
+	missileMesh.loadModel("..\\res\\NewMissile.obj");
 	nShader.init("..\\res\\shaderVert.vert", "..\\res\\shaderFrag.frag");
 	fogShader.init("..\\res\\fogShader.vert", "..\\res\\fogShader.frag"); //new shader
 	toonShader.init("..\\res\\shaderToon.vert", "..\\res\\shaderToon.frag"); //new shader
@@ -300,9 +300,9 @@ void MainGame::initModels(GameObject*& asteroid)
 	{
 		int range = 50 - -50.0 + 1;
 		int rAsDir = rand() % range + -50.0;
-		float rX = -2.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2.0)));
+		float rX = -1.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0 - -1.0)));
 		float rY= -1.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0 - -1.0)));
-		float rZ = -2.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2.0)));
+		float rZ = -1.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0 - -1.0)));
 
 		asteroid[i].transformPositions(glm::vec3(10.0 * i * rX, 2.0 * i * rY * 0, 10.0 * i * rZ), glm::vec3(rX, rY, rZ), glm::vec3(1.0, 1.0, 1.0));
 		asteroid[i].update(&rockMesh);
