@@ -296,19 +296,22 @@ void MainGame::drawMissiles()
 	{
 		if (missiles[i].getActive())
 		{
-			if (collision(asteroid[i].getTM().GetPos(), 1.0, missiles[i].getTM().GetPos(), 1.0))
+			for (int j = 0; j < 20; ++j)
 			{
-				asteroid[i].transformPositions(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
-				asteroid[i].setActive(false);
-				missiles[i].transformPositions(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
-				missiles[i].setActive(false);
+				if (collision(asteroid[j].getTM().GetPos(), 2.0, missiles[i].getTM().GetPos(), 2.0))
+				{
+					asteroid[j].transformPositions(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+					asteroid[j].setActive(false);
+					missiles[i].transformPositions(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+					missiles[i].setActive(false);
+				}
 			}
 
-			missiles[i].transformPositions(glm::vec3(glm::normalize(*asteroid[i].getTM().GetPos() - *missiles[i].getTM().GetPos()) + glm::vec3(missiles[i].getTM().GetPos()->x + deltaSpeed, 0, missiles[i].getTM().GetPos()->z + deltaSpeed)), glm::vec3(glm::normalize(*missiles[i].getTM().GetPos() + *asteroid[i].getTM().GetPos()) + glm::normalize(*ship.getTM().GetPos() + *missiles[i].getTM().GetPos()) + glm::vec3(0, 0, counter)), *missiles[i].getTM().GetScale());
+			//missiles[i].transformPositions(glm::vec3(glm::normalize(*asteroid[i].getTM().GetPos() - *missiles[i].getTM().GetPos()) + glm::vec3(missiles[i].getTM().GetPos()->x + deltaSpeed, 0, missiles[i].getTM().GetPos()->z + deltaSpeed)), glm::vec3(glm::normalize(*missiles[i].getTM().GetPos() + *asteroid[i].getTM().GetPos()) + glm::normalize(*ship.getTM().GetPos() + *missiles[i].getTM().GetPos()) + glm::vec3(0, 0, counter)), *missiles[i].getTM().GetScale());
 
 			//missiles[i].transformPositions(glm::vec3(glm::normalize(rayCaster.GetCurrentRay().x * 50 - *missiles[i].getTM().GetPos()) + glm::vec3(missiles[i].getTM().GetPos()->x + deltaSpeed, 0, missiles[i].getTM().GetPos()->z + deltaSpeed)), glm::vec3(glm::normalize(*missiles[i].getTM().GetPos() + rayCaster.GetCurrentRay()) + glm::normalize(*ship.getTM().GetPos() + *missiles[i].getTM().GetPos()) + glm::vec3(0, counter, 0)), *missiles[i].getTM().GetScale());
 
-			//missiles[i].transformPositions(glm::vec3(rayCaster.GetCurrentRay().x * 50, 0, -rayCaster.GetCurrentRay().y * -50) + *ship.getTM().GetPos() , *missiles[i].getTM().GetRot(), *missiles[i].getTM().GetScale());
+			missiles[i].transformPositions(glm::vec3(rayCaster.GetCurrentRay().x * 100 + ship.getTM().GetPos()->x, 0, ((rayCaster.GetCurrentRay().y + 0.5) * 100) + ship.getTM().GetPos()->z), *missiles[i].getTM().GetRot(), *missiles[i].getTM().GetScale());
 
 			missiles[i].draw(&missileMesh);
 			missiles[i].update(&missileMesh);
