@@ -12,6 +12,7 @@
 #include "SDLAudio.h"
 #include "DeltaTime.h"
 #include "glm/ext.hpp"
+#include "RayCaster.h"
 
 enum class GameState{PLAY, EXIT};
 
@@ -74,11 +75,12 @@ private:
 	double kSpeed;
 	double deltaSpeed;
 
+	RayCaster rayCaster;
+
 	const Uint8* keyboard_state_array;
 	bool engaging;
 
 	int missileCounter;
-	GLint mouseX, mouseY;
 
 	GameObject* asteroid = new GameObject[20];
 	float asDir[20] = { 0 };
