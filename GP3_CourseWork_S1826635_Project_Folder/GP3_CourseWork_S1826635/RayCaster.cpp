@@ -1,15 +1,31 @@
 #include "RayCaster.h"
 
-void RayCaster::initRayCaster(glm::mat4 projMat, glm::mat4 viewMat)
+void RayCaster::initRayCaster(glm::mat4 projMat, glm::mat4 viewMat, glm::vec3 cameraPos)
 {
+	currentCameraPos = cameraPos;
+	rayRange = 42;
 	this->projMatrix = projMat;
 	this->viewMatrix = viewMat;
 }
 
-void RayCaster::UpdateRay(glm::mat4 viewMat, float displayWidth, float displayHeight)
+void RayCaster::UpdateRay(glm::mat4 viewMat, float displayWidth, float displayHeight, glm::vec3 cameraPos)
 {
+	currentCameraPos = cameraPos;
 	viewMatrix = viewMat;
 	currentRay = CalculateMouseRay(displayWidth, displayHeight);
+
+	currentPlanePoint = GetPointOnRay(currentRay, rayRange);
+
+	rayRange += GetCurrentPlanePoint().y;
+
+	//if (IntersectionInRange(0, rayRange, currentRay))
+	//{
+	//	currentPlanePoint = pointOnPlane;
+	//}
+	//else
+	//{
+	//	currentPlanePoint = glm::vec3 (0, 0, 0);
+	//}
 }
 
 glm::vec3 RayCaster::CalculateMouseRay(float displayWidth, float displayHeight)
@@ -50,4 +66,42 @@ glm::vec3 RayCaster::ConvertToWorldCoords(glm::vec4 eyeCoords)
 	glm::vec3 normalizedMouseRay = glm::normalize(mouseRay);
 
 	return normalizedMouseRay;
+}
+
+bool RayCaster::IntersectionInRange(float start, float finish, glm::vec3 ray)
+{
+	glm::vec3 endPoint = GetPointOnRay(ray, finish);
+
+	pointOnPlane = endPoint;
+
+	if (IsPointOnPlane(endPoint))
+	{
+		pointOnPlane = endPoint;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+glm::vec3 RayCaster::GetPointOnRay(glm::vec3 ray, float distance)
+{
+	glm::vec3 start = currentCameraPos;
+	glm::vec3 scaledRay = glm::vec3(ray.x * distance, ray.y * distance, ray.z * distance);
+	return start + scaledRay;
+}
+
+bool RayCaster::IsPointOnPlane(glm::vec3 testPoint)
+{
+	float height = 0;
+
+	if (testPoint.y < height)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }

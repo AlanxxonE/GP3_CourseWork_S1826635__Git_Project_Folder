@@ -35,6 +35,7 @@ void MainGame::initSystems()
 	
 	gameAudio.addAudioTrack("..\\res\\background.wav");
 	gameAudio.addSoundEffect("..\\res\\bang.wav");
+	gameAudio.addSoundEffect("..\\res\\homing.wav");
 
 	geoShader.initGeo();
 
@@ -70,7 +71,7 @@ void MainGame::initSystems()
 
 	missileCounter = 20;
 
-	rayCaster.initRayCaster(myCamera.getProjection(), myCamera.getView());
+	rayCaster.initRayCaster(myCamera.getProjection(), myCamera.getView(), myCamera.getPos());
 }
 
 void MainGame::createScreenQuad()
@@ -120,9 +121,11 @@ void MainGame::gameLoop()
 		processInput();
 		drawGame();
 
-		rayCaster.UpdateRay(myCamera.getView(), _gameDisplay.getWidth(), _gameDisplay.getHeight());
+		rayCaster.UpdateRay(myCamera.getView(), _gameDisplay.getWidth(), _gameDisplay.getHeight(), myCamera.getPos());
 
 		//cout << "RAYX : " << rayCaster.GetCurrentRay().x << " RAYY : " << rayCaster.GetCurrentRay().y << "\n";
+
+		cout << "RAY RANGE :" << rayCaster.GetRayRange() << "CURRENT POINT ON PLANE : " << rayCaster.GetCurrentPlanePoint().x << " " << rayCaster.GetCurrentPlanePoint().y << " " << rayCaster.GetCurrentPlanePoint().z << "\n";
 
 		deltaTime.UpdateDeltaTime();
 		UpdateDeltaSpeed();
@@ -218,8 +221,12 @@ void MainGame::processInput()
 	{
 		if (evnt.button.button == SDL_BUTTON_LEFT)
 		{
-			missileCounter--;
-			fireMissiles(missileCounter);
+			if (missileCounter > 0 && !missiles[missileCounter].getActive())
+			{
+				gameAudio.playSoundEffect(1);
+				missileCounter--;
+				fireMissiles(missileCounter);
+			}
 		}
 	}
 }
@@ -307,11 +314,14 @@ void MainGame::drawMissiles()
 				}
 			}
 
+			//AutomaticHomingMissiles
 			//missiles[i].transformPositions(glm::vec3(glm::normalize(*asteroid[i].getTM().GetPos() - *missiles[i].getTM().GetPos()) + glm::vec3(missiles[i].getTM().GetPos()->x + deltaSpeed, 0, missiles[i].getTM().GetPos()->z + deltaSpeed)), glm::vec3(glm::normalize(*missiles[i].getTM().GetPos() + *asteroid[i].getTM().GetPos()) + glm::normalize(*ship.getTM().GetPos() + *missiles[i].getTM().GetPos()) + glm::vec3(0, 0, counter)), *missiles[i].getTM().GetScale());
 
-			//missiles[i].transformPositions(glm::vec3(glm::normalize(rayCaster.GetCurrentRay().x * 50 - *missiles[i].getTM().GetPos()) + glm::vec3(missiles[i].getTM().GetPos()->x + deltaSpeed, 0, missiles[i].getTM().GetPos()->z + deltaSpeed)), glm::vec3(glm::normalize(*missiles[i].getTM().GetPos() + rayCaster.GetCurrentRay()) + glm::normalize(*ship.getTM().GetPos() + *missiles[i].getTM().GetPos()) + glm::vec3(0, counter, 0)), *missiles[i].getTM().GetScale());
+			//ManualHomingMissiles
+			//missiles[i].transformPositions(glm::vec3(rayCaster.GetCurrentPlanePoint().x, 0, rayCaster.GetCurrentPlanePoint().z), *missiles[i].getTM().GetRot(), *missiles[i].getTM().GetScale());
 
-			missiles[i].transformPositions(glm::vec3(rayCaster.GetCurrentRay().x * 100 + ship.getTM().GetPos()->x, 0, ((rayCaster.GetCurrentRay().y + 0.5) * 100) + ship.getTM().GetPos()->z), *missiles[i].getTM().GetRot(), *missiles[i].getTM().GetScale());
+			missiles[i].transformPositions(glm::vec3(glm::normalize(glm::vec3(rayCaster.GetCurrentPlanePoint().x, 0, rayCaster.GetCurrentPlanePoint().z) - *missiles[i].getTM().GetPos()) + glm::vec3(missiles[i].getTM().GetPos()->x + deltaTime.GetDeltaTime(), 0, missiles[i].getTM().GetPos()->z + deltaTime.GetDeltaTime())), glm::vec3(glm::normalize(*missiles[i].getTM().GetPos() + glm::vec3(rayCaster.GetCurrentPlanePoint().x, 0, rayCaster.GetCurrentPlanePoint().z)) + glm::normalize(*ship.getTM().GetPos() + *missiles[i].getTM().GetPos()) + glm::vec3(0, counter, 0)), *missiles[i].getTM().GetScale());
+
 
 			missiles[i].draw(&missileMesh);
 			missiles[i].update(&missileMesh);
