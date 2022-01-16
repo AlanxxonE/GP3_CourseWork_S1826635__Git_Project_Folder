@@ -109,17 +109,10 @@
     <None Include="..\res\fogShader.frag" />
     <None Include="..\res\fogShader.vert" />
     <None Include="..\res\shaderFrag.frag" />
-    <None Include="..\res\shaderGeoText.frag" />
-    <None Include="..\res\shaderGeoText.geom" />
-    <None Include="..\res\shaderGeoText.vert" />
     <None Include="..\res\shaderReflection.frag" />
     <None Include="..\res\shaderReflection.vert" />
-    <None Include="..\res\shaderRim.frag" />
-    <None Include="..\res\shaderRim.vert" />
     <None Include="..\res\shaderSkybox.frag" />
     <None Include="..\res\shaderSkybox.vert" />
-    <None Include="..\res\shaderToon.frag" />
-    <None Include="..\res\shaderToon.vert" />
     <None Include="..\res\shaderVert.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
