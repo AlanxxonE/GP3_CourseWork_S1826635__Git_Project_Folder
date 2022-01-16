@@ -36,11 +36,7 @@ public:
 
 	glm::vec3 ConvertToWorldCoords(glm::vec4 eyeCoords);
 
-	bool IntersectionInRange(float start, float finish, glm::vec3 ray);
-
 	glm::vec3 GetPointOnRay(glm::vec3 ray, float distance);
-	
-	bool IsPointOnPlane(glm::vec3 testPoint);
 
 protected:
 private:

@@ -31,9 +31,6 @@ private:
 	void gameLoop();
 	void drawGame();
 	void linkFogShader();
-	void linkToon();
-	void linkRimLighting();
-	void linkGeo();
 	void linkEmapping();
 
 	void drawSkyBox();
@@ -63,9 +60,6 @@ private:
 	Camera myCamera;
 	Shader nShader;
 	Shader fogShader;
-	Shader toonShader;
-	Shader rimShader;
-	Shader geoShader;
 	Shader shaderSkybox;
 	Shader eMapping;
 	Shader FBOShader;
@@ -100,7 +94,6 @@ private:
 
 	vector<std::string> faces;
 	
-	bool look = true;
 	bool shake = false;
 	float counter;
 };

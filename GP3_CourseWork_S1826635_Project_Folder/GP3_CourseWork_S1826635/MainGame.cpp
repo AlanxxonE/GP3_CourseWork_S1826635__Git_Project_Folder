@@ -28,16 +28,12 @@ void MainGame::initSystems()
 	missileMesh.loadModel("..\\res\\NewMissile.obj");
 	nShader.init("..\\res\\shaderVert.vert", "..\\res\\shaderFrag.frag");
 	fogShader.init("..\\res\\fogShader.vert", "..\\res\\fogShader.frag");
-	toonShader.init("..\\res\\shaderToon.vert", "..\\res\\shaderToon.frag");
-	rimShader.init("..\\res\\shaderRim.vert", "..\\res\\shaderRim.frag");
 	eMapping.init("..\\res\\shaderReflection.vert", "..\\res\\shaderReflection.frag");
 	FBOShader.init("..\\res\\FBOShader.vert", "..\\res\\FBOShader.frag");
 	
 	gameAudio.addAudioTrack("..\\res\\background.wav");
 	gameAudio.addSoundEffect("..\\res\\bang.wav");
 	gameAudio.addSoundEffect("..\\res\\homing.wav");
-
-	geoShader.initGeo();
 
 	myCamera.initCamera(glm::vec3(ship.getTM().GetPos()->x, ship.getTM().GetPos()->y + 20, -50), 70.0f, (float)_gameDisplay.getWidth()/_gameDisplay.getHeight(), 1.0f, 1000.0f);
 	myCamera.setLook(glm::vec3(ship.getTM().GetPos()->x, ship.getTM().GetPos()->y, ship.getTM().GetPos()->z));
@@ -123,12 +119,10 @@ void MainGame::gameLoop()
 
 		rayCaster.UpdateRay(myCamera.getView(), _gameDisplay.getWidth(), _gameDisplay.getHeight(), myCamera.getPos());
 
-		//cout << "RAYX : " << rayCaster.GetCurrentRay().x << " RAYY : " << rayCaster.GetCurrentRay().y << "\n";
-
-		cout << "RAY RANGE :" << rayCaster.GetRayRange() << "CURRENT POINT ON PLANE : " << rayCaster.GetCurrentPlanePoint().x << " " << rayCaster.GetCurrentPlanePoint().y << " " << rayCaster.GetCurrentPlanePoint().z << "\n";
-
 		deltaTime.UpdateDeltaTime();
 		UpdateDeltaSpeed();
+
+		counter += 0.01f;
 	}
 }
 
@@ -273,7 +267,9 @@ void MainGame::drawAsteriods()
 		{
 			if (collision(asteroid[i].getTM().GetPos(), 1.0, ship.getTM().GetPos(), 1.0))
 			{
-				asteroid[i].transformPositions(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+				asteroid[i].transformPositions(glm::vec3(1000, 1000, 1000), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+				asteroid[i].draw(&rockMesh);
+				asteroid[i].update(&missileMesh);
 				asteroid[i].setActive(false);
 				ship.transformPositions(glm::vec3(0, 0.0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
 
@@ -307,9 +303,13 @@ void MainGame::drawMissiles()
 			{
 				if (collision(asteroid[j].getTM().GetPos(), 2.0, missiles[i].getTM().GetPos(), 2.0))
 				{
-					asteroid[j].transformPositions(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+					asteroid[j].transformPositions(glm::vec3(1000, 1000, 1000), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+					asteroid[j].draw(&rockMesh);
+					asteroid[j].update(&rockMesh);
 					asteroid[j].setActive(false);
 					missiles[i].transformPositions(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+					missiles[i].draw(&missileMesh);
+					missiles[i].update(&missileMesh);
 					missiles[i].setActive(false);
 				}
 			}
@@ -332,59 +332,6 @@ void MainGame::drawMissiles()
 
 void MainGame::fireMissiles(int missileNumber) 
 {
-	//const float* mvSource = (const float*)glm::value_ptr(shipTransform.GetModel());
-	//
-	//for (int i = 0; i < 16; ++i)
-	//{
-	//	mvmatrix[i] = mvSource[i];
-	//}
-
-	//GLdouble mvMatrix[16];
-	//GLdouble projMatrix[16];
-	//GLint viewport[4];
-	//GLdouble objx;
-	//GLdouble objy;
-	//GLdouble objz;
-	//int realY;
-	//glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix);
-	//glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
-	//glGetIntegerv(GL_VIEWPORT, viewport);
-
-	//cout << '\n';
-	//cout << "VIEWPORT MATRIX" << '\n';;
-	//cout << viewport[0] << "|" << viewport[1] << '\n';
-	//cout << viewport[2] << "|" << viewport[3] << '\n';
-	//cout << '\n';
-
-	//cout << '\n';
-	//cout << "MODELVIEW MATRIX" << '\n';;
-	//cout << mvMatrix[0] << "|" << mvMatrix[1] << mvMatrix[2] << "|" << mvMatrix[3] << '\n';
-	//cout << mvMatrix[4] << "|" << mvMatrix[5] << mvMatrix[6] << "|" << mvMatrix[7] << '\n';
-	//cout << mvMatrix[8] << "|" << mvMatrix[9] << mvMatrix[10] << "|" << mvMatrix[11] << '\n';
-	//cout << mvMatrix[12] << "|" << mvMatrix[13] << mvMatrix[14] << "|" << mvMatrix[15] << '\n';
-	//cout << '\n';
-
-	//cout << '\n';
-	//cout << "PROJECTION MATRIX" << '\n';;
-	//cout << projMatrix[0] << "|" << projMatrix[1] << projMatrix[2] << "|" << projMatrix[3] << '\n';
-	//cout << projMatrix[4] << "|" << projMatrix[5] << projMatrix[6] << "|" << projMatrix[7] << '\n';
-	//cout << projMatrix[8] << "|" << projMatrix[9] << projMatrix[10] << "|" << projMatrix[11] << '\n';
-	//cout << projMatrix[12] << "|" << projMatrix[13] << projMatrix[14] << "|" << projMatrix[15] << '\n';
-	//cout << '\n';
-
-	//realY = viewport[3] - mouseY - 1;
-
-	//const float* mvSource = (const float*)glm::value_ptr(shipTransform.GetModel());
-	//
-	//for (int i = 0; i < 16; ++i)
-	//{
-	//	mvMatrix[i] = mvSource[i];
-	//}
-	//gluUnProject((GLdouble)1000.0, (GLdouble)500.0, (GLdouble)1.0, mvMatrix, projMatrix, viewport, &objx, &objy, &objz);
-
-	//cout << "X : " << (GLdouble)mouseX << "|||";
-	//cout << "Y : " << (GLdouble)mouseY << "|||";
-
 	missiles[missileNumber].transformPositions(*ship.getTM().GetPos(), *ship.getTM().GetRot(), glm::vec3(0.3, 0.3, 0.3));
 	missiles[missileNumber].setActive(true);
 }
@@ -405,11 +352,8 @@ void MainGame::drawSkyBox()
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.textureID);
 
-	counter = counter + 0.02f;
-
 	skybox.draw(&myCamera);
 
-	myCamera.setPos(myCamera.getPos());
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnd();
 }
@@ -443,36 +387,6 @@ void MainGame::linkFogShader()
 	fogShader.setFloat("maxDist", 20.0f);
 	fogShader.setFloat("minDist", 0.0f);
 	fogShader.setVec3("fogColor", glm::vec3(0.0f, 0.0f, 0.0f));
-}
-
-void MainGame::linkToon()
-{
-	toonShader.setVec3("lightDir", glm::vec3(0.5f, 0.5f, 0.5f));
-}
-
-void MainGame::linkGeo()
-{
-	float randX = ((float)rand() / (RAND_MAX));
-	float randY = ((float)rand() / (RAND_MAX));
-	float randZ = ((float)rand() / (RAND_MAX));
-	// Frag: uniform float randColourX; uniform float randColourY; uniform float randColourZ;
-	geoShader.setFloat("randColourX", randX);
-	geoShader.setFloat("randColourY", randY);
-	geoShader.setFloat("randColourZ", randZ);
-	// Geom: uniform float time;
-	geoShader.setFloat("time", counter);
-}
-
-void MainGame::linkRimLighting()
-{
-	glm::vec3 camDir;
-	camDir = shipMesh.getSpherePos() - myCamera.getPos();
-	camDir = glm::normalize(camDir);
-	rimShader.setMat4("u_pm", myCamera.getProjection());
-	rimShader.setMat4("u_vm", myCamera.getView());
-	rimShader.setMat4("model", ship.getTM().GetModel());
-	rimShader.setMat4("view", myCamera.getView());
-	rimShader.setVec3("lightDir", glm::vec3(0.5f, 0.5f, 0.5f));
 }
 
 void MainGame::linkEmapping()
@@ -542,6 +456,7 @@ void MainGame::renderFBO()
 	{
 		FBOShader.setFloat("time", 1);
 	}
+
 	glBindVertexArray(quadVAO);
 	glBindTexture(GL_TEXTURE_2D, CBO);	// use the color attachment texture as the texture of the quad plane
 	glDrawArrays(GL_TRIANGLES, 0, 6);
