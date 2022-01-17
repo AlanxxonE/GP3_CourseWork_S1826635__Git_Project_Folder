@@ -34,6 +34,7 @@ void MainGame::initSystems()
 	gameAudio.addAudioTrack("..\\res\\background.wav");
 	gameAudio.addSoundEffect("..\\res\\bang.wav");
 	gameAudio.addSoundEffect("..\\res\\homing.wav");
+	gameAudio.addSoundEffect("..\\res\\beep.wav");
 
 	myCamera.initCamera(glm::vec3(ship.getTM().GetPos()->x, ship.getTM().GetPos()->y + 20, -50), 70.0f, (float)_gameDisplay.getWidth()/_gameDisplay.getHeight(), 1.0f, 1000.0f);
 	myCamera.setLook(glm::vec3(ship.getTM().GetPos()->x, ship.getTM().GetPos()->y, ship.getTM().GetPos()->z));
@@ -66,8 +67,38 @@ void MainGame::initSystems()
 	engaging = false;
 
 	missileCounter = 20;
+	manualMissileEngage = true;
 
 	rayCaster.initRayCaster(myCamera.getProjection(), myCamera.getView(), myCamera.getPos());
+
+	GameInstructions();
+}
+
+void MainGame::GameInstructions()
+{
+	instructionManual =
+		"\n"
+		"WELCOME TO ADASTRA - A 3D ASTEROID REVISION \n" 
+		"USE THE W-A-S-D KEYS TO MOVE THORUGH SPACE \n"
+		"SPACE AND LEFT-SHIFT KEYS TO ADJUST ELEVATION \n"
+		"WHEN THE SHIP IS STANDING STILL THE PERIFERAL VIEW CAN BE ENHANCED \n"
+		"PRESS THE DOWN-ARROW KEY TO GET A BETTER GRASP OF THE NEAR-SPACE SITUATION \n"
+		"\n"
+		"TO FIRE A MISSILE CLICK THE LEFT-MOUSE BUTTON ON THE MOUSE DEVICE \n"
+		"MISSILES CAN BE MANUALLY AIMED OR AUTOMATICALLY SEEK THEIR TARGET \n"
+		"CLICK THE RIGHT-MOUSE BUTTON INSTEAD TO ENGAGE THE MISSILE HOMING-MODE \n"
+		"FREELY SWITCH BETWEEN MODES BY USING THE SAME COMMAND \n"
+		"\n"
+		"HOMING MISSILES ARE EFFICIENT IF YOU ARE IN A SAFE SPOT \n"
+		"MANUAL AIM BECOMES NECESSARY IN SPECIFIC OCCASIONS \n"
+		"IF THE SITUATION IS TIGHT AND ACCURACY IS NEEDED THE LATTER CHOICE IS RECCOMENDED \n"
+		"\n"
+		"AVOID ASTEROIDS TO PREVENT THE SHIP DEMISE \n"
+		"EARN THE PAY BY CLEARING THE SPACE FROM ALL THE ASTEROIDS \n"
+		"\n"
+	;
+
+	cout << instructionManual;
 }
 
 void MainGame::createScreenQuad()
@@ -122,7 +153,7 @@ void MainGame::gameLoop()
 		deltaTime.UpdateDeltaTime();
 		UpdateDeltaSpeed();
 
-		counter += 0.01f;
+		counter += 2 * deltaTime.GetDeltaTime();
 	}
 }
 
@@ -134,6 +165,10 @@ void MainGame::processInput()
 
 	if (keyboard_state_array[SDL_SCANCODE_ESCAPE])
 	{
+		cout << "RETREAT-MODE ACTIVATED \n\n";
+
+		cout << "WITHDRAWAL SUCCEEDED \n\n";
+
 		_gameState = GameState::EXIT;
 	}
 
@@ -222,6 +257,22 @@ void MainGame::processInput()
 				fireMissiles(missileCounter);
 			}
 		}
+
+		if (evnt.button.button == SDL_BUTTON_RIGHT)
+		{
+			gameAudio.playSoundEffect(2);
+
+			manualMissileEngage = !manualMissileEngage;
+
+			if (manualMissileEngage)
+			{
+				cout << "HOMING MISSILES DISENGAGED \n\n";
+			}
+			else
+			{
+				cout << "HOMING MISSILES ENGAGED \n\n";
+			}
+		}
 	}
 }
 
@@ -273,6 +324,10 @@ void MainGame::drawAsteriods()
 				asteroid[i].setActive(false);
 				ship.transformPositions(glm::vec3(0, 0.0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
 
+				cout << "SHIP OBLITERATED \n\n";
+
+				cout << "NO PAY FOR THE DEAD \n\n";
+
 				_gameState = GameState::EXIT;
 			}
 
@@ -311,18 +366,36 @@ void MainGame::drawMissiles()
 					missiles[i].draw(&missileMesh);
 					missiles[i].update(&missileMesh);
 					missiles[i].setActive(false);
+
+					cout << "ASTEROID ANNIHILATED \n\n";
+
+					if (i == 0)
+					{
+						cout << "MISSION ACCOMPLISHED \n\n";
+
+						cout << "ALL ASTEROIDS HAVE BEEN DESTROYED \n\n";
+
+						_gameState = GameState::EXIT;
+					}
 				}
 			}
 
-			//AutomaticHomingMissiles
-			//missiles[i].transformPositions(glm::vec3(glm::normalize(*asteroid[i].getTM().GetPos() - *missiles[i].getTM().GetPos()) + glm::vec3(missiles[i].getTM().GetPos()->x + deltaSpeed, 0, missiles[i].getTM().GetPos()->z + deltaSpeed)), glm::vec3(glm::normalize(*missiles[i].getTM().GetPos() + *asteroid[i].getTM().GetPos()) + glm::normalize(*ship.getTM().GetPos() + *missiles[i].getTM().GetPos()) + glm::vec3(0, 0, counter)), *missiles[i].getTM().GetScale());
+			if (manualMissileEngage)
+			{
+				//ManualHomingMissiles
+				missiles[i].transformPositions(glm::vec3(glm::normalize(glm::vec3(rayCaster.GetCurrentPlanePoint().x, 0, rayCaster.GetCurrentPlanePoint().z) - *missiles[i].getTM().GetPos()) + glm::vec3(missiles[i].getTM().GetPos()->x + deltaTime.GetDeltaTime(), 0, missiles[i].getTM().GetPos()->z + deltaTime.GetDeltaTime())), glm::vec3(glm::normalize(*missiles[i].getTM().GetPos() + glm::vec3(rayCaster.GetCurrentPlanePoint().x, 0, rayCaster.GetCurrentPlanePoint().z)) + glm::normalize(*ship.getTM().GetPos() + *missiles[i].getTM().GetPos()) + glm::vec3(0, counter, 0)), *missiles[i].getTM().GetScale());
+			}
+			else
+			{
+				int j = 0;
+				while (!asteroid[j].getActive())
+				{
+					j++;
+				}
 
-			//ManualHomingMissiles
-			//missiles[i].transformPositions(glm::vec3(rayCaster.GetCurrentPlanePoint().x, 0, rayCaster.GetCurrentPlanePoint().z), *missiles[i].getTM().GetRot(), *missiles[i].getTM().GetScale());
-
-			missiles[i].transformPositions(glm::vec3(glm::normalize(glm::vec3(rayCaster.GetCurrentPlanePoint().x, 0, rayCaster.GetCurrentPlanePoint().z) - *missiles[i].getTM().GetPos()) + glm::vec3(missiles[i].getTM().GetPos()->x + deltaTime.GetDeltaTime(), 0, missiles[i].getTM().GetPos()->z + deltaTime.GetDeltaTime())), glm::vec3(glm::normalize(*missiles[i].getTM().GetPos() + glm::vec3(rayCaster.GetCurrentPlanePoint().x, 0, rayCaster.GetCurrentPlanePoint().z)) + glm::normalize(*ship.getTM().GetPos() + *missiles[i].getTM().GetPos()) + glm::vec3(0, counter, 0)), *missiles[i].getTM().GetScale());
-
-
+				//AutomaticHomingMissiles
+				missiles[i].transformPositions(glm::vec3(glm::normalize(*asteroid[j].getTM().GetPos() - *missiles[i].getTM().GetPos()) + glm::vec3(missiles[i].getTM().GetPos()->x + deltaSpeed, 0, missiles[i].getTM().GetPos()->z + deltaSpeed)), glm::vec3(glm::normalize(*missiles[i].getTM().GetPos() + *asteroid[j].getTM().GetPos()) + glm::normalize(*ship.getTM().GetPos() + *missiles[i].getTM().GetPos()) + glm::vec3(0, 0, counter)), *missiles[i].getTM().GetScale());
+			}
 			missiles[i].draw(&missileMesh);
 			missiles[i].update(&missileMesh);
 			fogShader.Update(missiles[i].getTM(), myCamera);
@@ -332,6 +405,7 @@ void MainGame::drawMissiles()
 
 void MainGame::fireMissiles(int missileNumber) 
 {
+	cout << "MISSILE FIRED \n\n";
 	missiles[missileNumber].transformPositions(*ship.getTM().GetPos(), *ship.getTM().GetRot(), glm::vec3(0.3, 0.3, 0.3));
 	missiles[missileNumber].setActive(true);
 }
@@ -365,6 +439,7 @@ bool MainGame::collision(glm::vec3 *m1Pos, float m1Rad, glm::vec3 *m2Pos, float 
 
 	if (distance < (m1Rad + m2Rad))
 	{
+		cout << "IMPACT CONFIRMED \n\n";
 		gameAudio.playSoundEffect(0);
 		shake = true;
 		return true;
@@ -382,8 +457,6 @@ void MainGame::UpdateDeltaSpeed()
 
 void MainGame::linkFogShader()
 {
-	//fogShader.setMat4("u_pm", myCamera.getProjection());
-	//fogShader.setMat4("u_vm", myCamera.getProjection());
 	fogShader.setFloat("maxDist", 20.0f);
 	fogShader.setFloat("minDist", 0.0f);
 	fogShader.setVec3("fogColor", glm::vec3(0.0f, 0.0f, 0.0f));
@@ -391,8 +464,14 @@ void MainGame::linkFogShader()
 
 void MainGame::linkEmapping()
 {
-	eMapping.setMat4("model", asteroid[0].getModel());
-	//eMapping.setVec3("cameraPos", myCamera.getPos());
+	//Avoid shader issue by fetching an asteroid that is no longer active
+	for (int i = 0; i < 20; ++i)
+	{
+		if (asteroid[i].getActive())
+		{
+			eMapping.setMat4("model", asteroid[i].getModel());
+		}
+	}
 }
 
 void MainGame::bindFBO()
@@ -439,7 +518,7 @@ void MainGame::generateFBO(float w, float h)
 void MainGame::renderFBO()
 {
 	
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	FBOShader.Bind();
@@ -478,11 +557,6 @@ void MainGame::drawGame()
 	renderFBO();
 
 	glEnable(GL_DEPTH_TEST);
-
-	//drawAsteriods();
-	//drawShip();
-	//drawSkyBox();
-	//drawMissiles();
 	
 	_gameDisplay.swapBuffer();		
 } 

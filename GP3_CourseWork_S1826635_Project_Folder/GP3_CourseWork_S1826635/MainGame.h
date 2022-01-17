@@ -11,7 +11,6 @@
 #include "GameObject.h"
 #include "SDLAudio.h"
 #include "DeltaTime.h"
-#include "glm/ext.hpp"
 #include "RayCaster.h"
 
 enum class GameState{PLAY, EXIT};
@@ -27,9 +26,12 @@ public:
 private:
 
 	void initSystems();
+	void GameInstructions();
+
 	void processInput();
 	void gameLoop();
 	void drawGame();
+
 	void linkFogShader();
 	void linkEmapping();
 
@@ -65,6 +67,8 @@ private:
 	Shader FBOShader;
 	SDLAudio gameAudio;
 
+	string instructionManual;
+
 	DeltaTime deltaTime;
 	double kSpeed;
 	double deltaSpeed;
@@ -75,6 +79,7 @@ private:
 	bool engaging;
 
 	int missileCounter;
+	bool manualMissileEngage;
 
 	GameObject* asteroid = new GameObject[20];
 	float asDir[20] = { 0 };
